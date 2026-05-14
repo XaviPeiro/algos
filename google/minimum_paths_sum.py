@@ -1,42 +1,30 @@
 from typing import List, Optional
 
-
 class Solution:
-
-    def get_left_cell_v(self, grid: List[List[int]], row: int, col: int) -> Optional[int]:
-        if col > 0:
-            return grid[row][col - 1]
-        else:
-            return None
-
-    def get_top_cell_v(self, grid: List[List[int]], row: int, col: int) -> Optional[int]:
-        if row > 0:
-            return grid[row - 1][col]
-        else:
-            return None
-
     def minPathSum(self, grid: List[List[int]]) -> int:
-        for krow, row in enumerate(grid):
-            for kcol, col in enumerate(row):
-                # get left and top cell
-                if krow + kcol == 0:
-                    continue
+        if len(grid) == 0:
+            return 0
 
-                left = self.get_left_cell_v(grid=grid, row=krow, col=kcol)
-                top = self.get_top_cell_v(grid=grid, row=krow, col=kcol)
-                # get min(left, top)
-                if not isinstance(left, int):
-                    left = float("inf")
-                if not isinstance(top, int):
-                    top = float("inf")
-                min_value = min(left, top)
+        def min_prev_positions(pos: tuple[int,int]) -> int:
+            up, left = (pos[0]-1,pos[1]), (pos[0],pos[1]-1)
+            upv = leftv = sentinel
 
-                # add(min_value, curr_value)
-                grid[krow][kcol] += min_value
+            if up[0]>=0:
+                upv = grid[up[0]][up[1]]
+
+            if left[1]>=0:
+                leftv = grid[left[0]][left[1]]
+
+            return min(upv, leftv)
+
+        sentinel = float('inf')
+        for x in range(0, len(grid)):
+            for y in range(0, len(grid[x])):
+                min_prev = min_prev_positions((x,y))
+                min_prev = 0 if min_prev == sentinel else min_prev
+                grid[x][y] += min_prev
+
         return grid[-1][-1]
-
-
-
 
 """
     Alg analysis:
