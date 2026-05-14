@@ -1,81 +1,75 @@
 from typing import List
 from collections import deque
 
-
-
-# def iter_board() ->:
 class Solution:
+    def __call__(self, board: List[List[int]]) -> int:    
+        n_cells = deque()
+        n_cells.append((len(board)-1, 0, 0))
     
-    def coor_to_n(self, x, y) -> int:
-        start_p = -len(self.board[0]) if not self.get_sense(x) else 0
-        return x*len(self.board[0]) + abs(start_p + y) + 1
-        
-    def n_to_coor(self, n: int) -> tuple[int, int]:
-        x = n//len(self.board[0])
-        
-        if x%2:
-            y = n%len(self.board[0])
-        else:
-            y = len(self.board[0]) - n%len(self.board[0])
+        while n_cells:
+            n_cell = n_cells.popleft()
+            row, col = n_cell[0], n_cell[1]
+            cells = self.get_next(board, row, col)
 
-        return (x,y)
-        
-    def get_sense(self, row_k):
-        return -1 if row_k%2 else 1
+            for c in cells:
+                if c[0] == 0 and c[1] == self.get_end_col(board):
+                    return n_cell[2]+1
+                n_cells.append((c[0], c[1], n_cell[2]+1))
+        return 0
 
-        
-    def __call__(self, board: List[List[int]]) -> int:
-        """
-            bfs -> pick last -1 and every ladder.
-            is_ladder: value > current_pos
-            the first one to reach the end wins
-        """
-        self.board = board
-        
-        next_elements = deque()
+    def get_end_col(self, board):
+        if self.get_sense(board, 0) == 1:
+            return len(board)-1
+        return 0
+    def get_sense(self, board, row):
+        return 1 if (len(board)-1)%2 == row%2 else -1
 
-        total_dice_throws = 0
-        
-        next_elements.append((len(board)-1, 0))
+    def get_next(self, board, row, col):
+        sense = self.get_sense(board, row)
 
-        while next_elements:
-            x,y = next_elements.popleft()
-
-            moves = 6
-            total_dice_throws += 1
-            for row_k in reversed(range(0, x+1)):
-                sense = self.get_sense(row_k)
-                col_iter = range(y, len(board[0])) if sense else range(y,0,-1)
-                
-                for col_k in col_iter:
-                    if moves < 0:
-                        break
-                        
-                    # if moves == 7:
-                    #     moves -= 1
-                    #     continue
-
-                    if self.coor_to_n(row_k, col_k) == 1:
-                        return total_dice_throws
-                        
-                    if board[row_k][col_k] == -1:
-                        if moves == 0:
-                            next_elements.append((row_k, col_k))
-                    elif board[row_k][col_k] > self.coor_to_n(row_k, col_k):
-                        next_elements.append((row_k, col_k))
+        res = []
+        for i in range(6):
+            if not 0 <= col+sense <= len(board)-1:
+                row -= 1
+                col = 0 if sense==-1 else len(board)-1
+            else:
+                col += sense
             
-                    moves -= 1
+            if not 0 <= row <= len(board)-1:
+                print("Out of the board")
+                break
+            
+            if board[row][col] != -1:
+                nrow, ncol = self.number_to_coor(board, board[row][col])
+                res.append((nrow, ncol))
+            elif i == 5:
+                res.append((row, col))
+            
+        return res
 
-                
-
-                    
-                if moves < 0:
-                    break
-                
-        return None
-                
+    def number_to_coor(self, board, n: int):
+        row, col = divmod(n, len(board))
+        if col == 0:
+            row -= 1
+            if self.get_sense(board, row) == 1:
+                col = len(board)-1
+            else:
+                col = 0
+        else:
+            if self.get_sense(board, row) == 1:
+                col = col - 1
+            else:
+                col = (len(board)-1-col)+1
+            col -= 1
+            
+        return (row, col)
+        
 if __name__ == "__main__":
-    s = Solution()
-    board = [[-1,-1,-1,-1,-1,-1],[-1,-1,-1,-1,-1,-1],[-1,-1,-1,-1,-1,-1],[-1,35,-1,-1,13,-1],[-1,-1,-1,-1,-1,-1],[-1,15,-1,-1,-1,-1]]
+    # s = Solution()
+    # board = [[-1,-1,-1,-1,-1,-1],[-1,-1,-1,-1,-1,-1],[-1,-1,-1,-1,-1,-1],[-1,35,-1,-1,13,-1],[-1,-1,-1,-1,-1,-1],[-1,15,-1,-1,-1,-1]]
 
-    s(board)
+    # assert s(board) == 4, s(board)
+    s = Solution()
+    board = [[-1,-1],[-1,3]]
+
+    assert s(board) == 1, s(board)
