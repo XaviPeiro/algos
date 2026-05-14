@@ -39,7 +39,6 @@ class Percolation:
             # weighted Quick Unions
             # Update _percolates if root row == 0
 
-
     def is_open(self, height: int, width: int) -> bool:
         return not (self.grid[height][width] is None)
 
