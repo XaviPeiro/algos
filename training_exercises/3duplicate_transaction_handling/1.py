@@ -102,8 +102,9 @@ def clean_transactions(transactions: list[dict]):
         if t['id'] not in ids:
             new_transactions.append(t)
             ids.add(t['id'])
+            
         else:
-            prev_duplciated = ids[t]
+            prev_duplciated = new_transactions[t['id']]
             if not are_trans_equal(t, prev_duplciated): # not perfect, should be done more carefully
                 new_transactions.remove(t)
                 error_ids.append(t['id'])
