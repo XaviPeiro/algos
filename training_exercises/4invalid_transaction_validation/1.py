@@ -84,7 +84,6 @@ class TransactionError(Exception):
     ...
 
 def validate_transactions(transactions: list[dict]) -> list:
-
     seen_ids = set()
     n_trans = {}
     errors = []
